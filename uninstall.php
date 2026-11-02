@@ -12,6 +12,7 @@ $parsireach_cleanup_site = static function ( array $tables ): void {
 		delete_option( $option );
 	}
 	delete_transient( 'parsireach_cached_credit_irr' );
+	delete_transient( 'parsireach_cached_credit_toman' );
 	delete_transient( 'parsishop_crm_cached_credit_irr' );
 
 	$hooks  = array( 'parsireach_execute_sms_job', 'parsireach_daily_maintenance', 'parsishop_crm_execute_sms_job', 'parsishop_crm_daily_maintenance' );

@@ -18,7 +18,7 @@ interface SmsProviderInterface {
 	public function send_pattern( string $recipient, string $pattern_code, array $values ): SmsResult;
 
 	/**
-	 * @return array{success: bool, credit_irr: float, message: string}
+	 * @return array{success: bool, credit_toman: float, message: string}
 	 */
 	public function get_credit(): array;
 

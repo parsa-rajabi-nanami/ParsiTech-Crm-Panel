@@ -70,7 +70,7 @@ final class SchemaManager {
 			order_id BIGINT UNSIGNED DEFAULT NULL,
 			phone_masked VARCHAR(20) NOT NULL,
 			phone_hash CHAR(64) NOT NULL,
-			provider VARCHAR(30) NOT NULL DEFAULT 'ippanel',
+			provider VARCHAR(30) NOT NULL DEFAULT 'farazsms',
 			status VARCHAR(20) NOT NULL,
 			message_id VARCHAR(100) DEFAULT NULL,
 			error_code VARCHAR(50) DEFAULT NULL,

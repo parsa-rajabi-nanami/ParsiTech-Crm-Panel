@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class MaintenanceScheduler {
 
 	public const HOOK_DAILY_CLEANUP = 'parsireach_daily_maintenance';
-	public const CREDIT_TRANSIENT   = 'parsireach_cached_credit_irr';
+	public const CREDIT_TRANSIENT   = 'parsireach_cached_credit_toman';
 
 	public static function init(): void {
 		add_action( self::HOOK_DAILY_CLEANUP, array( self::class, 'run_daily_maintenance' ) );
@@ -49,18 +49,15 @@ final class MaintenanceScheduler {
 	}
 
 	/**
-	 * @return array{success: bool, credit_irr: float, credit_toman: float, message: string}
+	 * @return array{success: bool, credit_toman: float, message: string}
 	 */
 	public static function refresh_and_check_credit( bool $force_live = false ): array {
 		if ( ! $force_live ) {
 			$cached_credit = get_transient( self::CREDIT_TRANSIENT );
 			if ( false !== $cached_credit && is_numeric( $cached_credit ) ) {
-				$credit_irr   = (float) $cached_credit;
-				$credit_toman = round( $credit_irr / 10 );
 				return array(
 					'success'      => true,
-					'credit_irr'   => $credit_irr,
-					'credit_toman' => $credit_toman,
+					'credit_toman' => (float) $cached_credit,
 					'message'      => __( 'موجودی از حافظه موقت خوانده شد.', 'parsireach' ),
 				);
 			}
@@ -70,14 +67,12 @@ final class MaintenanceScheduler {
 		$res      = $provider->get_credit();
 
 		if ( $res['success'] ) {
-			$credit_irr   = (float) $res['credit_irr'];
-			$credit_toman = round( $credit_irr / 10 );
+			$credit_toman = (float) $res['credit_toman'];
 
-			set_transient( self::CREDIT_TRANSIENT, $credit_irr, 30 * MINUTE_IN_SECONDS );
+			set_transient( self::CREDIT_TRANSIENT, $credit_toman, 30 * MINUTE_IN_SECONDS );
 
 			return array(
 				'success'      => true,
-				'credit_irr'   => $credit_irr,
 				'credit_toman' => $credit_toman,
 				'message'      => $res['message'],
 			);
@@ -85,7 +80,6 @@ final class MaintenanceScheduler {
 
 		return array(
 			'success'      => false,
-			'credit_irr'   => 0.0,
 			'credit_toman' => 0.0,
 			'message'      => $res['message'],
 		);

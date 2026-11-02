@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       ParsiReach – WooCommerce Order SMS Automation
- * Description:       Schedule IPPanel pattern messages from WooCommerce order status changes.
+ * Description:       Schedule FarazSMS pattern messages from WooCommerce order status changes.
  * Version:           1.0.0
  * Requires at least: 6.4
  * Requires PHP:      8.1

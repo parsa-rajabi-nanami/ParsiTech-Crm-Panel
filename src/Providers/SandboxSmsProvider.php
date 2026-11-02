@@ -31,7 +31,7 @@ final class SandboxSmsProvider implements SmsProviderInterface {
 	public function get_credit(): array {
 		return array(
 			'success'    => false,
-			'credit_irr' => 0.0,
+			'credit_toman' => 0.0,
 			'message'    => __( 'حالت شبیه‌سازی فعال است؛ موجودی واقعی پنل استعلام نمی‌شود.', 'parsireach' ),
 		);
 	}

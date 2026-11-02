@@ -1,6 +1,6 @@
 {
   "name": "parsireach/woocommerce-order-sms",
-  "description": "Scheduled WooCommerce order SMS patterns with IPPanel Edge",
+  "description": "Scheduled WooCommerce order SMS patterns with FarazSMS",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {

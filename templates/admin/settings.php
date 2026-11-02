@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php settings_fields( 'parsireach_settings_group' ); ?>
 
 		<div class="parsireach-card">
-			<h2><?php esc_html_e( '۱. وضعیت سرویس و احراز هویت پنل IPPanel Edge', 'parsireach' ); ?></h2>
+			<h2><?php esc_html_e( '۱. وضعیت سرویس و احراز هویت پنل فراز اس‌ام‌اس', 'parsireach' ); ?></h2>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><?php esc_html_e( 'فعال‌سازی ارسال پیامک', 'parsireach' ); ?></th>
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<tr>
 					<th scope="row">
-						<label for="parsireach_new_api_key"><?php esc_html_e( 'کلید دسترسی API (IPPanel Edge)', 'parsireach' ); ?></label>
+						<label for="parsireach_new_api_key"><?php esc_html_e( 'کلید API فراز اس‌ام‌اس', 'parsireach' ); ?></label>
 					</th>
 					<td>
 						<input
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php esc_html_e( 'برای حفظ کلید فعلی، فیلد بالا را خالی بگذارید.', 'parsireach' ); ?>
 							</p>
 						<?php else : ?>
-							<p class="description"><?php esc_html_e( 'کلید API را از پنل IPPanel در بخش برنامه‌نویسان ← کلیدهای دسترسی دریافت کنید؛ سپس تنظیمات را ذخیره کنید.', 'parsireach' ); ?></p>
+							<p class="description"><?php esc_html_e( 'کلید API را از پنل فراز اس‌ام‌اس دریافت کنید؛ کلید را بدون پیشوند Bearer وارد و تنظیمات را ذخیره کنید.', 'parsireach' ); ?></p>
 						<?php endif; ?>
 						<?php if ( '' !== $masked_api_key ) : ?>
 							<label><input type="checkbox" name="parsireach_settings[clear_api_key]" value="1" /> <?php esc_html_e( 'حذف کلید ذخیره‌شده', 'parsireach' ); ?></label>
@@ -84,9 +84,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							name="parsireach_settings[sender_number]"
 							value="<?php echo esc_attr( (string) $settings['sender_number'] ); ?>"
 							class="regular-text ltr-input"
-							placeholder="+98..."
+							placeholder="50002178584000"
 						/>
-						<p class="description"><?php esc_html_e( 'شماره خط مجاز پنل را در قالب E.164 وارد کنید. این شماره باید برای کلید API شما مجاز باشد.', 'parsireach' ); ?></p>
+						<p class="description"><?php esc_html_e( 'شماره خط را دقیقاً مطابق مقدار line_number در پنل فراز وارد کنید؛ آن را به قالب E.164 یا +98 تبدیل نکنید. خط باید برای حساب شما مجاز باشد.', 'parsireach' ); ?></p>
 					</td>
 				</tr>
 

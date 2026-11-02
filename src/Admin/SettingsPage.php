@@ -200,9 +200,8 @@ final class SettingsPage {
 			wp_send_json_success(
 				array(
 					'message'      => sprintf(
-						__( 'اتصال برقرار است. اعتبار فعلی پنل: %s تومان (%s ریال)', 'parsireach' ),
-						number_format_i18n( $res['credit_toman'] ),
-						number_format_i18n( $res['credit_irr'] )
+						__( 'اتصال برقرار است. اعتبار فعلی پنل: %s تومان', 'parsireach' ),
+						number_format_i18n( $res['credit_toman'] )
 					),
 					'credit_toman' => $res['credit_toman'],
 				)
