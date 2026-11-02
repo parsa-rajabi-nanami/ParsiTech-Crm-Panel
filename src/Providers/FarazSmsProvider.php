@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Providers;
+namespace ParsiReach\Providers;
 
-use ParsiShop\CRM\Providers\Contracts\SmsProviderInterface;
-use ParsiShop\CRM\Providers\Contracts\SmsResult;
-use ParsiShop\CRM\Support\PhoneNormalizer;
+use ParsiReach\Providers\Contracts\SmsProviderInterface;
+use ParsiReach\Providers\Contracts\SmsResult;
+use ParsiReach\Support\PhoneNormalizer;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -52,29 +52,12 @@ final class FarazSmsProvider implements SmsProviderInterface {
 		return $this->dispatch_request( '/api/send', $payload );
 	}
 
-	public function send_text( string $recipient, string $message ): SmsResult {
-		$e164       = PhoneNormalizer::to_e164( $recipient );
-		$originator = PhoneNormalizer::normalize_originator( $this->originator );
-		if ( '' === $this->api_key || '' === $originator || '' === $e164 || '' === trim( $message ) ) {
-			return $this->configuration_error();
-		}
-
-		$payload = array(
-			'sending_type' => 'webservice',
-			'from_number'  => $originator,
-			'message'      => $message,
-			'params'       => array( 'recipients' => array( $e164 ) ),
-		);
-
-		return $this->dispatch_request( '/api/send', $payload );
-	}
-
 	public function get_credit(): array {
 		if ( '' === $this->api_key ) {
 			return array(
 				'success'    => false,
 				'credit_irr' => 0.0,
-				'message'    => __( 'کلید API وارد نشده است. ابتدا کلید را ذخیره کنید.', 'parsishop-crm' ),
+				'message'    => __( 'کلید API وارد نشده است. ابتدا کلید را ذخیره کنید.', 'parsireach' ),
 			);
 		}
 
@@ -102,7 +85,7 @@ final class FarazSmsProvider implements SmsProviderInterface {
 			return array(
 				'success'    => true,
 				'credit_irr' => (float) $decoded['data']['credit'],
-				'message'    => __( 'اتصال با موفقیت برقرار شد.', 'parsishop-crm' ),
+				'message'    => __( 'اتصال با موفقیت برقرار شد.', 'parsireach' ),
 			);
 		}
 
@@ -152,15 +135,13 @@ final class FarazSmsProvider implements SmsProviderInterface {
 
 		$error = $this->extract_error( $decoded, $http_code );
 		$retryable = in_array( $http_code, array( 408, 425, 429 ), true ) || $http_code >= 500;
-		$low_credit = 402 === $http_code || str_contains( $error, 'اعتبار' ) || str_contains( strtolower( $error ), 'credit' );
 
 		return new SmsResult(
 			success: false,
 			status: 'failed',
 			error_code: 'HTTP_' . $http_code,
 			summary: self::truncate( $error, 250 ),
-			is_retryable: $retryable,
-			is_low_credit: $low_credit
+			is_retryable: $retryable
 		);
 	}
 

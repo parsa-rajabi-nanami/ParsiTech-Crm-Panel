@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Repositories;
+namespace ParsiReach\Repositories;
 
-use ParsiShop\CRM\Support\DateHelper;
+use ParsiReach\Support\DateHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -14,7 +14,7 @@ final class JobRepository {
 
 	private static function table(): string {
 		global $wpdb;
-		return $wpdb->prefix . 'parsishop_crm_jobs';
+		return $wpdb->prefix . 'parsireach_jobs';
 	}
 
 	public static function insert_idempotent(
@@ -33,7 +33,7 @@ final class JobRepository {
 		$rows = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT IGNORE INTO {$table}
-				(order_id, plan_id, step_number, customer_phone_hash, scheduled_at, status, attempts, created_at, updated_at)
+				(order_id, plan_id, step_number, phone_hash, scheduled_at, status, attempts, created_at, updated_at)
 				VALUES (%d, %d, %d, %s, %s, 'pending', 0, %s, %s)",
 				$order_id,
 				$plan_id,
@@ -119,9 +119,9 @@ final class JobRepository {
 		foreach ( $jobs as $job ) {
 			$args = array( 'job_id' => (int) $job->id );
 			if ( function_exists( 'as_unschedule_all_actions' ) ) {
-				as_unschedule_all_actions( 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' );
+				as_unschedule_all_actions( 'parsireach_execute_sms_job', $args, 'parsireach' );
 			} else {
-				wp_clear_scheduled_hook( 'parsishop_crm_execute_sms_job', $args );
+				wp_clear_scheduled_hook( 'parsireach_execute_sms_job', $args );
 			}
 		}
 
@@ -149,9 +149,9 @@ final class JobRepository {
 		foreach ( $jobs as $job ) {
 			$args = array( 'job_id' => (int) $job->id );
 			if ( function_exists( 'as_unschedule_all_actions' ) ) {
-				as_unschedule_all_actions( 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' );
+				as_unschedule_all_actions( 'parsireach_execute_sms_job', $args, 'parsireach' );
 			} else {
-				wp_clear_scheduled_hook( 'parsishop_crm_execute_sms_job', $args );
+				wp_clear_scheduled_hook( 'parsireach_execute_sms_job', $args );
 			}
 		}
 		return (int) $wpdb->query(
@@ -182,7 +182,7 @@ final class JobRepository {
 		while ( true ) {
 			if ( null === $plan_id ) {
 				$sql = "SELECT j.id, j.scheduled_at, j.last_error FROM {$table} j
-					LEFT JOIN {$wpdb->prefix}parsishop_crm_plans p ON p.id = j.plan_id
+					LEFT JOIN {$wpdb->prefix}parsireach_plans p ON p.id = j.plan_id
 					WHERE j.status = 'paused' AND j.id > %d
 					AND (j.last_error = %s OR (j.last_error = %s AND p.status = 'active'))";
 				$args = array( $last_id, $global_pause_reason, $plan_pause_reason );
@@ -214,11 +214,11 @@ final class JobRepository {
 				}
 
 				if ( function_exists( 'as_schedule_single_action' ) ) {
-					if ( ! function_exists( 'as_has_scheduled_action' ) || ! as_has_scheduled_action( 'parsishop_crm_execute_sms_job', $args_for_action, 'parsishop-crm' ) ) {
-						as_schedule_single_action( $when, 'parsishop_crm_execute_sms_job', $args_for_action, 'parsishop-crm' );
+					if ( ! function_exists( 'as_has_scheduled_action' ) || ! as_has_scheduled_action( 'parsireach_execute_sms_job', $args_for_action, 'parsireach' ) ) {
+						as_schedule_single_action( $when, 'parsireach_execute_sms_job', $args_for_action, 'parsireach' );
 					}
-				} elseif ( ! wp_next_scheduled( 'parsishop_crm_execute_sms_job', $args_for_action ) ) {
-					wp_schedule_single_event( $when, 'parsishop_crm_execute_sms_job', $args_for_action );
+				} elseif ( ! wp_next_scheduled( 'parsireach_execute_sms_job', $args_for_action ) ) {
+					wp_schedule_single_event( $when, 'parsireach_execute_sms_job', $args_for_action );
 				}
 				++$resumed;
 			}
@@ -254,12 +254,12 @@ final class JobRepository {
 				$args = array( 'job_id' => $job_id );
 
 				if ( function_exists( 'as_schedule_single_action' ) ) {
-					if ( ! function_exists( 'as_has_scheduled_action' ) || ! as_has_scheduled_action( 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' ) ) {
-						as_schedule_single_action( $when, 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' );
+					if ( ! function_exists( 'as_has_scheduled_action' ) || ! as_has_scheduled_action( 'parsireach_execute_sms_job', $args, 'parsireach' ) ) {
+						as_schedule_single_action( $when, 'parsireach_execute_sms_job', $args, 'parsireach' );
 						++$scheduled;
 					}
-				} elseif ( ! wp_next_scheduled( 'parsishop_crm_execute_sms_job', $args ) ) {
-					wp_schedule_single_event( $when, 'parsishop_crm_execute_sms_job', $args );
+				} elseif ( ! wp_next_scheduled( 'parsireach_execute_sms_job', $args ) ) {
+					wp_schedule_single_event( $when, 'parsireach_execute_sms_job', $args );
 					++$scheduled;
 				}
 			}
@@ -267,32 +267,4 @@ final class JobRepository {
 
 		return $scheduled;
 	}
-
-	public static function count_recent_sent_to_phone( string $phone_hash, int $days, string $legacy_hash = '' ): int {
-		global $wpdb;
-
-		if ( $days <= 0 || '' === $phone_hash ) {
-			return 0;
-		}
-
-		$jobs_table = self::table();
-		$logs_table = $wpdb->prefix . 'parsishop_crm_logs';
-		$since      = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
-
-		// Only real provider-accepted sends count toward the cap; sandbox runs do not.
-		if ( '' !== $legacy_hash && ! hash_equals( $phone_hash, $legacy_hash ) ) {
-			$sql = "SELECT COUNT(j.id) FROM {$jobs_table} j
-				WHERE j.customer_phone_hash IN (%s, %s)
-				AND j.status = 'completed' AND j.updated_at >= %s
-				AND EXISTS (SELECT 1 FROM {$logs_table} l WHERE l.job_id = j.id AND l.status = 'sent')";
-			return (int) $wpdb->get_var( $wpdb->prepare( $sql, $phone_hash, $legacy_hash, $since ) );
-		}
-
-		$sql = "SELECT COUNT(j.id) FROM {$jobs_table} j
-			WHERE j.customer_phone_hash = %s
-			AND j.status = 'completed' AND j.updated_at >= %s
-			AND EXISTS (SELECT 1 FROM {$logs_table} l WHERE l.job_id = j.id AND l.status = 'sent')";
-		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $phone_hash, $since ) );
-	}
-
 }

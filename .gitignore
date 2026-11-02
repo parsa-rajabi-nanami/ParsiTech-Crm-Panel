@@ -32,6 +32,9 @@ wp-config.php
 # Log files
 *.log
 
+# Local Graphify architecture index (generated, not part of plugin releases).
+/graphify-out/
+
 # htaccess
 /.htaccess
 

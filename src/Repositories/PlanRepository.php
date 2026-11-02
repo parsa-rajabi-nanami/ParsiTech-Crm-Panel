@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Repositories;
+namespace ParsiReach\Repositories;
 
-use ParsiShop\CRM\Support\DateHelper;
-use ParsiShop\CRM\Admin\SettingsPage;
+use ParsiReach\Support\DateHelper;
+use ParsiReach\Admin\SettingsPage;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class PlanRepository {
 	private static function table(): string {
 		global $wpdb;
-		return $wpdb->prefix . 'parsishop_crm_plans';
+		return $wpdb->prefix . 'parsireach_plans';
 	}
 
 	public static function get_all_plans(): array {
@@ -28,8 +28,8 @@ final class PlanRepository {
 		global $wpdb;
 		$table = self::table();
 		$sql   = $wpdb->prepare(
-			"SELECT * FROM {$table} WHERE status = 'active' AND trigger_statuses LIKE %s",
-			'%' . $wpdb->esc_like( '"' . $status_trigger . '"' ) . '%'
+			"SELECT * FROM {$table} WHERE status = 'active' AND trigger_status = %s",
+			$status_trigger
 		);
 		$rows = $wpdb->get_results( $sql );
 		return is_array( $rows ) ? $rows : array();
@@ -73,15 +73,15 @@ final class PlanRepository {
 
 	public static function delete( int $id ): bool {
 		global $wpdb;
-		$jobs_table = $wpdb->prefix . 'parsishop_crm_jobs';
+		$jobs_table = $wpdb->prefix . 'parsireach_jobs';
 		$jobs = $wpdb->get_results( $wpdb->prepare( "SELECT id FROM {$jobs_table} WHERE plan_id = %d", $id ) );
 		if ( is_array( $jobs ) ) {
 			foreach ( $jobs as $job ) {
 				$args = array( 'job_id' => (int) $job->id );
 				if ( function_exists( 'as_unschedule_all_actions' ) ) {
-					as_unschedule_all_actions( 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' );
+					as_unschedule_all_actions( 'parsireach_execute_sms_job', $args, 'parsireach' );
 				} else {
-					wp_clear_scheduled_hook( 'parsishop_crm_execute_sms_job', $args );
+					wp_clear_scheduled_hook( 'parsireach_execute_sms_job', $args );
 				}
 			}
 		}

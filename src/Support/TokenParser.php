@@ -2,24 +2,19 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Support;
+namespace ParsiReach\Support;
 
-use ParsiShop\CRM\Core\Privacy;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 final class TokenParser {
-	public static function parse_string( string $template, \WC_Order $order, string $recipient_phone = '' ): string {
-		return strtr( $template, self::get_tokens( $order, $recipient_phone ) );
-	}
-
 	/** @param array<string, mixed> $values
 	 *  @return array<string, string>
 	 */
-	public static function parse_array( array $values, \WC_Order $order, string $recipient_phone = '' ): array {
-		$tokens = self::get_tokens( $order, $recipient_phone );
+	public static function parse_array( array $values, \WC_Order $order ): array {
+		$tokens = self::get_tokens( $order );
 		$parsed = array();
 		foreach ( $values as $key => $value ) {
 			$key = (string) $key;
@@ -31,7 +26,7 @@ final class TokenParser {
 	}
 
 	/** @return array<string, string> */
-	private static function get_tokens( \WC_Order $order, string $recipient_phone ): array {
+	private static function get_tokens( \WC_Order $order ): array {
 		$items         = $order->get_items();
 		$first_product = '';
 		if ( ! empty( $items ) ) {
@@ -48,7 +43,6 @@ final class TokenParser {
 			'{order_total}'        => wp_strip_all_tags( wc_price( (float) $order->get_total(), array( 'currency' => $order->get_currency() ) ) ),
 			'{product_name}'       => (string) $first_product,
 			'{shop_name}'          => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
-			'{unsubscribe_url}'    => '' !== $recipient_phone ? Privacy::get_unsubscribe_url( 'sms', $recipient_phone ) : '',
 		);
 	}
 }

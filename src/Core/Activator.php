@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Core;
+namespace ParsiReach\Core;
 
-use ParsiShop\CRM\Admin\SettingsPage;
-use ParsiShop\CRM\Scheduler\MaintenanceScheduler;
+use ParsiReach\Admin\SettingsPage;
+use ParsiReach\Scheduler\MaintenanceScheduler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -15,9 +15,9 @@ final class Activator {
 
 	public static function activate(): void {
 		if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
-			deactivate_plugins( plugin_basename( PARSISHOP_CRM_FILE ) );
+			deactivate_plugins( plugin_basename( PARSIREACH_FILE ) );
 			wp_die(
-				esc_html__( 'افزونه ParsiReach نیازمند PHP نسخه 8.1 یا بالاتر است.', 'parsishop-crm' )
+				esc_html__( 'افزونه ParsiReach نیازمند PHP نسخه 8.1 یا بالاتر است.', 'parsireach' )
 			);
 		}
 
@@ -33,7 +33,7 @@ final class Activator {
 
 		MaintenanceScheduler::schedule_recurring_tasks();
 		if ( class_exists( 'WooCommerce' ) ) {
-			\ParsiShop\CRM\Repositories\JobRepository::reschedule_pending_jobs();
+			\ParsiReach\Repositories\JobRepository::reschedule_pending_jobs();
 		}
 	}
 }

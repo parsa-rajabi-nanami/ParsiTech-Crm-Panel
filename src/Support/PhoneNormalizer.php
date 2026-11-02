@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Support;
+namespace ParsiReach\Support;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -70,13 +70,5 @@ final class PhoneNormalizer {
 			return 'INVALID';
 		}
 		return substr( $normalized, 0, 4 ) . '***' . substr( $normalized, 7, 4 );
-	}
-
-	public static function hash( string $phone ): string {
-		$normalized = self::normalize( $phone );
-		if ( '' === $normalized ) {
-			return '';
-		}
-		return hash_hmac( 'sha256', $normalized, wp_salt( 'auth' ) . 'parsishop_phone_hash' );
 	}
 }

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Scheduler;
+namespace ParsiReach\Scheduler;
 
-use ParsiShop\CRM\Admin\SettingsPage;
-use ParsiShop\CRM\Repositories\JobRepository;
-use ParsiShop\CRM\Repositories\PlanRepository;
-use ParsiShop\CRM\Support\DateHelper;
-use ParsiShop\CRM\Support\PhoneNormalizer;
-use ParsiShop\CRM\Support\RecipientHasher;
+use ParsiReach\Admin\SettingsPage;
+use ParsiReach\Repositories\JobRepository;
+use ParsiReach\Repositories\PlanRepository;
+use ParsiReach\Support\DateHelper;
+use ParsiReach\Support\PhoneNormalizer;
+use ParsiReach\Support\PhoneHasher;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,7 +25,6 @@ final class OrderEventListener {
 		$order_id = absint( $order_id );
 		if ( in_array( $new_status, array( 'cancelled', 'refunded', 'failed' ), true ) ) {
 			JobRepository::cancel_by_order( $order_id, 'وضعیت سفارش به لغوشده/مستردشده تغییر کرد' );
-			return;
 		}
 
 		$settings = SettingsPage::get_settings();
@@ -40,13 +39,13 @@ final class OrderEventListener {
 			return;
 		}
 
-		$plans = PlanRepository::get_active_plans( 'wc-' . sanitize_key( (string) $new_status ) );
+		$plans = PlanRepository::get_active_plans( sanitize_key( (string) $new_status ) );
 		if ( empty( $plans ) ) {
 			return;
 		}
 
 		$phone      = PhoneNormalizer::normalize( (string) $order->get_billing_phone() );
-		$phone_hash = RecipientHasher::hash( 'sms', $phone );
+		$phone_hash = PhoneHasher::hash( $phone );
 		if ( '' === $phone || '' === $phone_hash ) {
 			return;
 		}
@@ -57,7 +56,7 @@ final class OrderEventListener {
 			}
 
 			$delay_seconds       = self::calc_delay( $plan );
-			$scheduled_timestamp = DateHelper::adjust_to_allowed_window( time() + $delay_seconds );
+			$scheduled_timestamp = time() + $delay_seconds;
 			$scheduled_at_utc    = gmdate( 'Y-m-d H:i:s', $scheduled_timestamp );
 			$job_id              = JobRepository::insert_idempotent( $order_id, (int) $plan->id, 1, $phone_hash, $scheduled_at_utc );
 
@@ -71,14 +70,14 @@ final class OrderEventListener {
 		$args = array( 'job_id' => $job_id );
 		$when = max( time() + 1, $timestamp );
 		if ( function_exists( 'as_schedule_single_action' ) ) {
-			if ( function_exists( 'as_has_scheduled_action' ) && as_has_scheduled_action( 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' ) ) {
+			if ( function_exists( 'as_has_scheduled_action' ) && as_has_scheduled_action( 'parsireach_execute_sms_job', $args, 'parsireach' ) ) {
 				return;
 			}
-			as_schedule_single_action( $when, 'parsishop_crm_execute_sms_job', $args, 'parsishop-crm' );
+			as_schedule_single_action( $when, 'parsireach_execute_sms_job', $args, 'parsireach' );
 			return;
 		}
-		if ( ! wp_next_scheduled( 'parsishop_crm_execute_sms_job', $args ) ) {
-			wp_schedule_single_event( $when, 'parsishop_crm_execute_sms_job', $args );
+		if ( ! wp_next_scheduled( 'parsireach_execute_sms_job', $args ) ) {
+			wp_schedule_single_event( $when, 'parsireach_execute_sms_job', $args );
 		}
 	}
 

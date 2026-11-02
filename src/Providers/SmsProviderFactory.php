@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Providers;
+namespace ParsiReach\Providers;
 
-use ParsiShop\CRM\Admin\SettingsPage;
-use ParsiShop\CRM\Providers\Contracts\SmsProviderInterface;
+use ParsiReach\Admin\SettingsPage;
+use ParsiReach\Providers\Contracts\SmsProviderInterface;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,6 +25,6 @@ final class SmsProviderFactory {
 
 		$provider = new FarazSmsProvider( $api_key, $originator );
 
-		return apply_filters( 'parsishop_crm_sms_provider', $provider, $settings );
+		return apply_filters( 'parsireach_sms_provider', $provider, $settings );
 	}
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Support;
+namespace ParsiReach\Support;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -91,6 +91,6 @@ final class Crypto {
 
 	private static function derive_key(): string {
 		$salt_material = wp_salt( 'auth' ) . '|' . wp_salt( 'secure_auth' );
-		return hash_hkdf( 'sha256', $salt_material, 32, 'parsishop-crm-encryption-v1' );
+		return hash_hkdf( 'sha256', $salt_material, 32, 'parsireach-encryption-v1' );
 	}
 }

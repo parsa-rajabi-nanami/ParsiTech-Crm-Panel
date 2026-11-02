@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Core;
+namespace ParsiReach\Core;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Capabilities {
 
-	public const MANAGE_CAP = 'parsishop_crm_manage';
+	public const MANAGE_CAP = 'parsireach_manage';
 
 	public static function init(): void {
 		add_filter( 'user_has_cap', array( self::class, 'grant_cap_to_shop_managers' ), 10, 4 );

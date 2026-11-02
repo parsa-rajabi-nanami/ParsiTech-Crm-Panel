@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Providers;
+namespace ParsiReach\Providers;
 
-use ParsiShop\CRM\Providers\Contracts\SmsProviderInterface;
-use ParsiShop\CRM\Providers\Contracts\SmsResult;
+use ParsiReach\Providers\Contracts\SmsProviderInterface;
+use ParsiReach\Providers\Contracts\SmsResult;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -28,21 +28,11 @@ final class SandboxSmsProvider implements SmsProviderInterface {
 		);
 	}
 
-	public function send_text( string $recipient, string $message ): SmsResult {
-		return new SmsResult(
-			success: true,
-			status: 'sandbox',
-			message_id: 'SANDBOX-' . wp_generate_password( 8, false ),
-			summary: sprintf( 'حالت تست (پیام متنی - طول: %d کاراکتر)', ( function_exists( 'mb_strlen' ) ? mb_strlen( $message, 'UTF-8' ) : strlen( $message ) ) ),
-			is_retryable: false
-		);
-	}
-
 	public function get_credit(): array {
 		return array(
 			'success'    => false,
 			'credit_irr' => 0.0,
-			'message'    => __( 'حالت شبیه‌سازی فعال است؛ موجودی واقعی پنل استعلام نمی‌شود.', 'parsishop-crm' ),
+			'message'    => __( 'حالت شبیه‌سازی فعال است؛ موجودی واقعی پنل استعلام نمی‌شود.', 'parsireach' ),
 		);
 	}
 }

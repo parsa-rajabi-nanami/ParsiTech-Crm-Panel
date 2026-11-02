@@ -1,56 +1,45 @@
-=== ParsiReach – WooCommerce Marketing Automation ===
-Contributors: parsishop
-Tags: woocommerce, sms, marketing automation, ippanel
+=== ParsiReach – WooCommerce Order SMS Automation ===
+Tags: woocommerce, sms, automation, ippanel
 Requires at least: 6.4
 Requires PHP: 8.1
-Stable tag: 2.0.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Consent-aware, event-driven SMS marketing automation for WooCommerce with IPPanel Edge.
+Schedule IPPanel pattern messages when WooCommerce orders change status.
 
 == Description ==
 
-ParsiReach automates post-order SMS messages based on WooCommerce order status changes. It supports delays, repeated messages, order-total rules, frequency caps, quiet hours, a queued dispatcher, sandbox testing, consent checks, unsubscribe handling and send logs.
-
-The current release is SMS-focused. It does not provide email campaign sending, bulk newsletters, abandoned-cart recovery or a full contact CRM.
+Create automations with an order status trigger, pattern code and variables, an initial delay, a total send count and an interval between sends. The plugin uses WooCommerce Action Scheduler, with WP-Cron as a fallback.
 
 == Requirements ==
 
 * WordPress 6.4+
 * PHP 8.1+
 * WooCommerce 7.9+
-* An IPPanel Edge API key and an authorized sender line in E.164 format (for example, `+983000505`)
+* IPPanel Edge API key and an authorized sender line
 
 == Installation ==
 
-1. Back up your WordPress files and database.
-2. Upload and activate the plugin ZIP. For an existing ParsiShop CRM installation, replace/update the existing `parsishop-crm` plugin; do not run two copies.
-3. Enter your IPPanel Edge API key and sender line in E.164 format (for example, `+983000505`) in ParsiReach > SMS Settings.
-4. Keep Sandbox enabled while checking the rules and schedule.
-5. Enable the optional, unchecked-by-default marketing consent checkbox in classic WooCommerce checkout.
-6. Create an automation and review the logs before disabling Sandbox.
+1. Install and activate the plugin.
+2. In ParsiReach > SMS Settings, enter the raw IPPanel API key without a Bearer prefix and the authorized sender number.
+3. Keep Sandbox enabled while checking the connection and automation setup. Enable live sending only when ready.
+4. Create an automation and set its trigger status, delay, pattern code, JSON variables, total send count and interval.
 
-== Privacy ==
+== Automation flow ==
 
-Marketing consent is required by default. Opt-out records are checked before sending. The classic checkout consent field is optional and unchecked by default. Pattern messages must include their opt-out wording/link in the approved pattern itself.
+When an order status changes, the plugin finds active automations matching the new status and creates a unique queued job. The job runs after the configured delay. Before sending, the plugin checks the automation, current order status and recipient number, fills pattern tokens from order data, and submits the request to IPPanel. After an accepted request, the next send is scheduled until the configured total count is reached. Temporary errors are retried up to three times. A successful report means IPPanel accepted the request; delivery receipts are not supported.
 
-This plugin provides technical controls, not legal advice or a guarantee of regulatory compliance. The site owner is responsible for lawful consent and message content.
+Sandbox jobs are recorded without contacting IPPanel. In low-traffic stores, configure a real server cron to run wp-cron.php reliably.
 
-== Delivery status ==
+== Pattern variables ==
 
-A successful `sent` log means IPPanel accepted the API request. Delivery receipts are not integrated in this version, so the plugin does not confirm handset delivery.
+Enter a JSON object with keys matching the approved IPPanel pattern variables. Supported value tokens: {customer_name}, {customer_last_name}, {order_number}, {order_date}, {order_total}, {product_name}, {shop_name}.
 
-== Upgrade and uninstall ==
+== Reports ==
 
-Legacy option names, database tables, plugin folder and scheduled hook names are retained for in-place upgrades. Uninstall removes connection settings and scheduled tasks but intentionally retains database tables, logs, consent records and suppression hashes to avoid accidental data loss.
+Filter send records, delete selected records or clear all reports. Failed jobs can be queued again from the report table.
 
-== Changelog ==
+== Uninstall ==
 
-= 2.0.0 =
-* Renamed the product to ParsiReach while preserving legacy identifiers for upgrade compatibility.
-* Migrated SMS requests and credit lookup to IPPanel Edge API.
-* Added stable recipient hashes, marketing-consent records and signed unsubscribe links.
-* Enforced global enable state, opt-outs, consent, quiet hours and frequency caps before dispatch.
-* Added safer queue pause/resume behavior, retry scheduling and sandbox isolation.
-* Removed the misleading email-drafts-only screen from the active product UI.
+Uninstall deletes the plugin settings, queues, reports, tables and plugin-specific database data.

@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace ParsiShop\CRM\Repositories;
+namespace ParsiReach\Repositories;
 
-use ParsiShop\CRM\Providers\Contracts\SmsResult;
-use ParsiShop\CRM\Support\DateHelper;
-use ParsiShop\CRM\Support\PhoneNormalizer;
+use ParsiReach\Providers\Contracts\SmsResult;
+use ParsiReach\Support\DateHelper;
+use ParsiReach\Support\PhoneNormalizer;
+use ParsiReach\Support\PhoneHasher;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +17,7 @@ final class LogRepository {
 
 	private static function table(): string {
 		global $wpdb;
-		return $wpdb->prefix . 'parsishop_crm_logs';
+		return $wpdb->prefix . 'parsireach_logs';
 	}
 
 	public static function record(
@@ -36,7 +37,7 @@ final class LogRepository {
 				'plan_id'              => $plan_id,
 				'order_id'             => $order_id,
 				'phone_masked'         => PhoneNormalizer::mask( $raw_phone ),
-				'phone_hash'           => PhoneNormalizer::hash( $raw_phone ),
+				'phone_hash'           => PhoneHasher::hash( $raw_phone ),
 				'provider'             => sanitize_key( $provider ),
 				'status'               => sanitize_key( $result->status ),
 				'message_id'           => $result->message_id ? sanitize_text_field( $result->message_id ) : null,
@@ -69,6 +70,23 @@ final class LogRepository {
 		);
 	}
 
+	/** @param int[] $ids */
+	public static function delete_ids( array $ids ): int {
+		global $wpdb;
+		$ids = array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
+		if ( empty( $ids ) ) {
+			return 0;
+		}
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return (int) $wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . " WHERE id IN ({$placeholders})", ...$ids ) );
+	}
+
+	public static function delete_all(): int {
+		global $wpdb;
+		return (int) $wpdb->query( 'DELETE FROM ' . self::table() );
+	}
+
 	/**
 	 * @param array<string, mixed> $filters
 	 * @return array{items: array<int, object>, total: int}
@@ -91,7 +109,7 @@ final class LogRepository {
 		}
 
 		if ( ! empty( $filters['phone'] ) ) {
-			$phone_hash = PhoneNormalizer::hash( (string) $filters['phone'] );
+			$phone_hash = PhoneHasher::hash( (string) $filters['phone'] );
 			if ( '' !== $phone_hash ) {
 				$where[]  = 'phone_hash = %s';
 				$values[] = $phone_hash;
